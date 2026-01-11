@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bakong Banking Simulation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #1abc9c;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, #34495e 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .main-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-content h1 {
+            color: var(--primary);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-content p {
+            color: var(--gray);
+            font-size: 1.2rem;
+            max-width: 600px;
+        }
+        
+        .simulation-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        /* Main Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 25px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Left Panel - Simulation Controls */
+        .simulation-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Middle Panel - Main Content */
+        .main-content {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 25px;
+        }
+        
+        /* Transfer Form */
+        .transfer-form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--light);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* JSON Panel */
+        .json-container {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .json-display {
+            flex: 1;
+            background: #0f3460;
+            border-radius: 15px;
+            padding: 25px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #f8fafc;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        /* Right Panel - Simulation Results */
+        .results-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        /* Simulation Controls */
+        .control-group {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid var(--light);
+        }
+        
+        .slider-group {
+            margin-bottom: 20px;
+        }
+        
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .slider-value {
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: var(--light);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--secondary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: var(--primary);
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--gray);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        /* Button Styles */
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        /* Progress Bars */
+        .progress-container {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: var(--light);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--info));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--light), white);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid var(--light);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Simulation Visualizations */
+        .visualization {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .network-nodes {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .connection {
+            position: absolute;
+            height: 3px;
+            background: var(--success);
+            transform-origin: 0 0;
+        }
+        
+        /* Alerts */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background: #e8f4f8;
+            color: #31708f;
+            border-left-color: var(--info);
+        }
+        
+        .alert-success {
+            background: #dff0d8;
+            color: #3c763d;
+            border-left-color: var(--success);
+        }
+        
+        .alert-warning {
+            background: #fcf8e3;
+            color: #8a6d3b;
+            border-left-color: var(--warning);
+        }
+        
+        .alert-danger {
+            background: #f2dede;
+            color: #a94442;
+            border-left-color: var(--danger);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+        
+        /* Transaction List */
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .transaction-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid var(--light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .transaction-item:hover {
+            border-color: var(--secondary);
+            transform: translateX(5px);
+        }
+        
+        .transaction-item.active {
+            border-color: var(--success);
+            background: #f8fff8;
+        }
+        
+        .tx-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .tx-amount {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .tx-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-success { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        
+        /* Console Output */
+        .console-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Monaco', monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .console-line {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .console-time {
+            color: var(--info);
+            margin-right: 10px;
+        }
+        
+        /* Footer */
+        .simulation-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            margin-top: 30px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .footer-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-content h1 {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <h1>
+                    <span>🏦</span>
+                    Bakong Banking Simulation System
+                    <span>⚡</span>
+                </h1>
+                <p>Advanced simulation platform for testing banking transactions, network latency, and error scenarios</p>
+            </div>
+            <div class="simulation-controls">
+                <button class="btn btn-success" id="startSimulation">
+                    <span>▶️</span>
+                    Start Simulation
+                </button>
+                <button class="btn btn-danger" id="stopSimulation">
+                    <span>⏹️</span>
+                    Stop
+                </button>
+                <button class="btn btn-warning" id="resetSimulation">
+                    <span>🔄</span>
+                    Reset All
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Panel: Simulation Controls -->
+            <div class="simulation-panel">
+                <div>
+                    <h3 class="section-title">
+                        <span>⚙️</span>
+                        Simulation Settings
+                    </h3>
+                    
+                    <div class="control-group">
+                        <div class="toggle-switch">
+                            <span>Auto Simulation Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="autoMode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="toggle-switch">
+                            <span>Real-time Updates</span>
+                            <label class="switch">
+                                <input type="checkbox" id="realtimeUpdates" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="slider-group">
+                            <label>
+                                Transaction Speed
+                                <span class="slider-value" id="speedValue">Normal</span>
+                            </label>
+                            <input type="range" id="speedSlider" min="1" max="10" value="5">
+                        </div>
+                        
+                        <div class="slider-group">
+                            <label>
+                                Success Rate
+                                <span class="slider-value" id="successValue">95%</span>
+                            </label>
+                            <input type="range" id="successSlider" min="50" max="100" value="95">
+                        </div>
+                        
+                        <div class="slider-group">
+                            <label>
+                                Network Latency
+                                <span class="slider-value" id="latencyValue">200ms</span>
+                            </label>
+                            <input type="range" id="latencySlider" min="0" max="2000" value="200" step="50">
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h4>Transaction Volume</h4>
+                        <div class="btn-group">
+                            <button class="btn" id="lowVolume">Low</button>
+                            <button class="btn btn-primary" id="mediumVolume">Medium</button>
+                            <button class="btn" id="highVolume">High</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h4>Error Injection</h4>
+                        <div class="btn-group">
+                            <button class="btn" id="noErrors">None</button>
+                            <button class="btn btn-warning" id="randomErrors">Random</button>
+                            <button class="btn btn-danger" id="stressTest">Stress Test</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="section-title">
+                        <span>📈</span>
+                        Performance Metrics
+                    </h3>
+                    
+                    <div class="progress-container">
+                        <label>System Load</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="systemLoad"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span id="loadValue">45%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <label>Network Usage</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="networkUsage"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span id="networkValue">32%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTx">0</div>
+                        <div class="stat-label">Total Tx</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successTx">0</div>
+                        <div class="stat-label">Successful</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="failedTx">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgTime">0ms</div>
+                        <div class="stat-label">Avg Time</div>
+                    </div>
+                </div>
+                
+                <div class="visualization">
+                    <h4>Network Visualization</h4>
+                    <div class="network-nodes" id="networkVisualization">
+                        <!-- Nodes and connections will be added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Middle Panel: Main Content -->
+            <div class="main-content">
+                <!-- Transfer Form -->
+                <div class="transfer-form-container">
+                    <h3 class="section-title">
+                        <span>💸</span>
+                        Transaction Form
+                    </h3>
+                    
+                    <div class="alert" id="formAlert"></div>
+                    
+                    <form id="transferForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Sender Account</label>
+                                <input type="text" id="fromAccount" value="rieu_dhqj_1984@devb" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Recipient Account</label>
+                                <input type="text" id="toAccount" value="bridge_account@devb" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Currency</label>
+                                <select id="currency" required>
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="KHR">KHR - Cambodian Riel</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <input type="number" id="amount" value="1.0" step="0.01" min="0.01" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="description" value="testing bakong generator" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Transaction Type</label>
+                                <select id="txType">
+                                    <option value="normal">Normal Transfer</option>
+                                    <option value="instant">Instant Transfer</option>
+                                    <option value="scheduled">Scheduled</option>
+                                    <option value="recurring">Recurring</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Receiver Bank</label>
+                                <input type="text" id="receiverBank" value="Dev Bank">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Receiver Account</label>
+                                <input type="text" id="receiverAccount" value="8*******123">
+                            </div>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button type="button" class="btn" id="testConnection">
+                                <span>🔗</span>
+                                Test Connection
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitTransaction">
+                                <span>🚀</span>
+                                Send Transaction
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- JSON Response -->
+                <div class="json-container">
+                    <div class="section-title">
+                        <span>📄</span>
+                        Live JSON Response
+                        <div style="margin-left: auto;">
+                            <button class="action-btn" id="copyJson">📋 Copy</button>
+                            <button class="action-btn" id="refreshJson">🔄 Refresh</button>
+                        </div>
+                    </div>
+                    
+                    <div class="json-display" id="jsonDisplay">
+                        {
+  "responseCode": 0,
+  "responseMessage": "Getting transaction successfully.",
+  "data": {
+    "hash": "8465d722d7d50....",
+    "fromAccountId": "rieu_dhqj_1984@devb",
+    "toAccountId": "bridge_account@devb",
+    "currency": "USD",
+    "amount": 1.0,
+    "description": "testing bakong generator",
+    "trackingStatus": "RECEIVE_AT_RECEIVER_BANK",
+    "receiverBank": "Dev Bank",
+    "receiverBankAccount": "8*******123",
+    "createdDateMs": 1636709121073.0,
+    "acknowledgedDateMs": 1636709123467.2
+  }
+}
+                    </div>
+                    
+                    <div class="console-output" id="consoleOutput">
+                        <div class="console-line">
+                            <span class="console-time">[12:45:23]</span>
+                            System: Simulation ready
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel: Simulation Results -->
+            <div class="results-panel">
+                <h3 class="section-title">
+                    <span>📊</span>
+                    Simulation Results
+                </h3>
+                
+                <div class="alert alert-info" id="simAlert">
+                    Simulation ready. Click Start to begin.
+                </div>
+                
+                <div class="transaction-list" id="transactionList">
+                    <!-- Transactions will appear here -->
+                </div>
+                
+                <div>
+                    <h4>Real-time Statistics</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="txPerSecond">0</div>
+                            <div class="stat-label">Tx/Sec</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="errorRate">0%</div>
+                            <div class="stat-label">Error Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="queueSize">0</div>
+                            <div class="stat-label">In Queue</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="memoryUsage">45%</div>
+                            <div class="stat-label">Memory</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Simulation Timeline</h4>
+                    <div class="progress-container">
+                        <label>Simulation Progress</label>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="simProgress"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span id="progressValue">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Performance Graph</h4>
+                    <canvas id="performanceChart" style="width: 100%; height: 150px;"></canvas>
+                </div>
+                
+                <button class="btn btn-warning" id="exportData">
+                    <span>📥</span>
+                    Export Simulation Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="simulation-footer">
+            <div>
+                <span>Bakong Banking Simulation System v2.0</span>
+            </div>
+            <div class="footer-stats">
+                <span>Uptime: <span id="uptime">00:00:00</span></span>
+                <span>Active: <span id="activeConnections">0</span> connections</span>
+                <span>CPU: <span id="cpuUsage">15%</span></span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Main Simulation Controller
+        class BankingSimulation {
+            constructor() {
+                this.isRunning = false;
+                this.autoMode = false;
+                this.transactions = [];
+                this.metrics = {
+                    total: 0,
+                    successful: 0,
+                    failed: 0,
+                    totalTime: 0,
+                    startTime: null
+                };
+                this.simulationSettings = {
+                    speed: 5,
+                    successRate: 95,
+                    latency: 200,
+                    volume: 'medium',
+                    errorRate: 0,
+                    stressTest: false
+                };
+                this.networkNodes = [];
+                this.performanceData = [];
+                this.intervalIds = [];
+                this.consoleHistory = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.loadSampleTransactions();
+                this.createNetworkVisualization();
+                this.updateUI();
+                this.log('System initialized');
+            }
+            
+            loadSampleTransactions() {
+                this.transactions = [
+                    {
+                        id: 1,
+                        hash: "8465d722d7d50....",
+                        fromAccountId: "rieu_dhqj_1984@devb",
+                        toAccountId: "bridge_account@devb",
+                        currency: "USD",
+                        amount: 1.0,
+                        description: "testing bakong generator",
+                        trackingStatus: "SUCCESS",
+                        receiverBank: "Dev Bank",
+                        receiverBankAccount: "8*******123",
+                        timestamp: Date.now() - 60000,
+                        processingTime: 2394
+                    }
+                ];
+            }
+            
+            createNetworkVisualization() {
+                const container = document.getElementById('networkVisualization');
+                container.innerHTML = '';
+                
+                // Create 5 nodes
+                const nodePositions = [
+                    { top: '20%', left: '20%' },
+                    { top: '50%', left: '10%' },
+                    { top: '80%', left: '30%' },
+                    { top: '30%', left: '70%' },
+                    { top: '60%', left: '80%' }
+                ];
+                
+                nodePositions.forEach((pos, i) => {
+                    const node = document.createElement('div');
+                    node.className = 'node';
+                    node.style.top = pos.top;
+                    node.style.left = pos.left;
+                    node.textContent = `N${i + 1}`;
+                    node.style.animationDelay = `${i * 0.5}s`;
+                    container.appendChild(node);
+                    
+                    // Create connections
+                    if (i > 0) {
+                        const connection = document.createElement('div');
+                        connection.className = 'connection';
+                        const startX = parseInt(nodePositions[i-1].left);
+                        const startY = parseInt(nodePositions[i-1].top);
+                        const endX = parseInt(pos.left);
+                        const endY = parseInt(pos.top);
+                        
+                        const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                        
+                        connection.style.width = `${length}%`;
+                        connection.style.left = `${startX}%`;
+                        connection.style.top = `${startY}%`;
+                        connection.style.transform = `rotate(${angle}deg)`;
+                        
+                        container.appendChild(connection);
+                    }
+                });
+            }
+            
+            startSimulation() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.metrics.startTime = Date.now();
+                this.log('Simulation started');
+                
+                // Start auto transactions if auto mode is on
+                if (this.autoMode) {
+                    this.startAutoTransactions();
+                }
+                
+                // Start metrics updates
+                this.intervalIds.push(setInterval(() => this.updateMetrics(), 1000));
+                this.intervalIds.push(setInterval(() => this.updateVisualizations(), 500));
+                this.intervalIds.push(setInterval(() => this.updateUptime(), 1000));
+                
+                // Update UI
+                document.getElementById('startSimulation').disabled = true;
+                document.getElementById('stopSimulation').disabled = false;
+                document.getElementById('simAlert').textContent = 'Simulation running...';
+                document.getElementById('simAlert').className = 'alert alert-success';
+            }
+            
+            stopSimulation() {
+                if (!this.isRunning) return;
+                
+                this.isRunning = false;
+                
+                // Clear all intervals
+                this.intervalIds.forEach(id => clearInterval(id));
+                this.intervalIds = [];
+                
+                this.log('Simulation stopped');
+                
+                // Update UI
+                document.getElementById('startSimulation').disabled = false;
+                document.getElementById('stopSimulation').disabled = true;
+                document.getElementById('simAlert').textContent = 'Simulation stopped';
+                document.getElementById('simAlert').className = 'alert alert-warning';
+            }
+            
+            resetSimulation() {
+                this.stopSimulation();
+                this.transactions = [];
+                this.metrics = {
+                    total: 0,
+                    successful: 0,
+                    failed: 0,
+                    totalTime: 0,
+                    startTime: null
+                };
+                this.performanceData = [];
+                this.consoleHistory = [];
+                
+                this.updateUI();
+                this.loadSampleTransactions();
+                this.updateTransactionList();
+                this.log('Simulation reset');
+            }
+            
+            startAutoTransactions() {
+                if (!this.isRunning) return;
+                
+                const interval = 3000 / this.simulationSettings.speed;
+                this.intervalIds.push(setInterval(() => {
+                    this.generateRandomTransaction();
+                }, interval));
+            }
+            
+            async processTransaction(formData) {
+                this.metrics.total++;
+                
+                // Simulate network latency
+                const latency = this.simulationSettings.latency + Math.random() * 100;
+                await this.sleep(latency);
+                
+                // Check for failure based on success rate
+                const successChance = Math.random() * 100;
+                const isSuccess = successChance <= this.simulationSettings.successRate;
+                
+                // Generate transaction data
+                const transaction = {
+                    id: Date.now(),
+                    hash: this.generateHash(),
+                    ...formData,
+                    trackingStatus: isSuccess ? 'SUCCESS' : 'FAILED',
+                    timestamp: Date.now(),
+                    processingTime: latency + Math.random() * 500
+                };
+                
+                // Add to transactions list
+                this.transactions.unshift(transaction);
+                
+                // Update metrics
+                if (isSuccess) {
+                    this.metrics.successful++;
+                } else {
+                    this.metrics.failed++;
+                }
+                this.metrics.totalTime += transaction.processingTime;
+                
+                // Log result
+                const status = isSuccess ? '✅' : '❌';
+                this.log(`${status} Transaction ${transaction.hash.substring(0, 8)}... ${isSuccess ? 'succeeded' : 'failed'} in ${transaction.processingTime.toFixed(0)}ms`);
+                
+                // Update UI
+                this.updateUI();
+                this.updateTransactionList();
+                this.updateJSON(transaction);
+                
+                return transaction;
+            }
+            
+            generateRandomTransaction() {
+                const banks = ['Dev Bank', 'ABC Bank', 'XYZ Bank', 'National Bank', 'Global Bank'];
+                const currencies = ['USD', 'KHR', 'EUR', 'GBP'];
+                const descriptions = [
+                    'Payment for services',
+                    'Fund transfer',
+                    'Online purchase',
+                    'Bill payment',
+                    'Money transfer'
+                ];
+                
+                const formData = {
+                    fromAccountId: `user${Math.floor(Math.random() * 1000)}@devb`,
+                    toAccountId: `recipient${Math.floor(Math.random() * 1000)}@devb`,
+                    currency: currencies[Math.floor(Math.random() * currencies.length)],
+                    amount: parseFloat((Math.random() * 1000 + 1).toFixed(2)),
+                    description: descriptions[Math.floor(Math.random() * descriptions.length)],
+                    receiverBank: banks[Math.floor(Math.random() * banks.length)],
+                    receiverBankAccount: `${Math.floor(Math.random() * 900000000) + 100000000}`
+                };
+                
+                return this.processTransaction(formData);
+            }
+            
+            updateMetrics() {
+                // Update real-time metrics
+                const txPerSecond = this.transactions.filter(tx => 
+                    Date.now() - tx.timestamp < 1000
+                ).length;
+                
+                const errorRate = this.metrics.total > 0 ? 
+                    (this.metrics.failed / this.metrics.total * 100).toFixed(1) : 0;
+                
+                const avgTime = this.metrics.successful > 0 ? 
+                    (this.metrics.totalTime / this.metrics.successful).toFixed(0) : 0;
+                
+                // Update UI
+                document.getElementById('totalTx').textContent = this.metrics.total;
+                document.getElementById('successTx').textContent = this.metrics.successful;
+                document.getElementById('failedTx').textContent = this.metrics.failed;
+                document.getElementById('avgTime').textContent = `${avgTime}ms`;
+                document.getElementById('txPerSecond').textContent = txPerSecond;
+                document.getElementById('errorRate').textContent = `${errorRate}%`;
+                
+                // Update progress bars
+                const load = 30 + Math.random() * 50;
+                const network = 20 + Math.random() * 40;
+                const memory = 40 + Math.random() * 30;
+                
+                document.getElementById('systemLoad').style.width = `${load}%`;
+                document.getElementById('networkUsage').style.width = `${network}%`;
+                document.getElementById('loadValue').textContent = `${load.toFixed(0)}%`;
+                document.getElementById('networkValue').textContent = `${network.toFixed(0)}%`;
+                document.getElementById('memoryUsage').textContent = `${memory.toFixed(0)}%`;
+                
+                // Update performance data
+                this.performanceData.push({
+                    time: Date.now(),
+                    txPerSecond,
+                    errorRate,
+                    load
+                });
+                
+                if (this.performanceData.length > 20) {
+                    this.performanceData.shift();
+                }
+                
+                this.updatePerformanceChart();
+            }
+            
+            updateVisualizations() {
+                // Animate network nodes
+                const nodes = document.querySelectorAll('.node');
+                nodes.forEach(node => {
+                    const currentScale = parseFloat(node.style.transform?.replace('scale(', '')?.replace(')', '')) || 1;
+                    const newScale = 0.95 + Math.random() * 0.1;
+                    node.style.transform = `scale(${newScale})`;
+                });
+            }
+            
+            updateUptime() {
+                if (!this.metrics.startTime) return;
+                
+                const uptime = Date.now() - this.metrics.startTime;
+                const hours = Math.floor(uptime / 3600000);
+                const minutes = Math.floor((uptime % 3600000) / 60000);
+                const seconds = Math.floor((uptime % 60000) / 1000);
+                
+                document.getElementById('uptime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Simulate CPU usage
+                const cpu = 10 + Math.random() * 30;
+                document.getElementById('cpuUsage').textContent = `${cpu.toFixed(0)}%`;
+                
+                // Simulate active connections
+                const connections = Math.floor(5 + Math.random() * 20);
+                document.getElementById('activeConnections').textContent = connections;
+            }
+            
+            updateUI() {
+                // Update progress bar based on transactions
+                const progress = Math.min(this.metrics.total * 5, 100);
+                document.getElementById('simProgress').style.width = `${progress}%`;
+                document.getElementById('progressValue').textContent = `${progress}%`;
+            }
+            
+            updateTransactionList() {
+                const container = document.getElementById('transactionList');
+                const recentTransactions = this.transactions.slice(0, 10);
+                
+                container.innerHTML = recentTransactions.map(tx => `
+                    <div class="transaction-item" data-id="${tx.id}">
+                        <div class="tx-header">
+                            <div class="tx-amount">${tx.currency} ${tx.amount.toFixed(2)}</div>
+                            <div class="tx-status status-${tx.trackingStatus.toLowerCase()}">
+                                ${tx.trackingStatus}
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            ${tx.fromAccountId} → ${tx.toAccountId}
+                        </div>
+                        <div style="font-size: 11px; color: #999; margin-top: 5px;">
+                            ${new Date(tx.timestamp).toLocaleTimeString()} • ${tx.processingTime.toFixed(0)}ms
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateJSON(transaction) {
+                const json = {
+                    responseCode: transaction.trackingStatus === 'SUCCESS' ? 0 : 1,
+                    responseMessage: transaction.trackingStatus === 'SUCCESS' ? 
+                        "Transaction processed successfully" : "Transaction failed",
+                    data: {
+                        hash: transaction.hash,
+                        fromAccountId: transaction.fromAccountId,
+                        toAccountId: transaction.toAccountId,
+                        currency: transaction.currency,
+                        amount: transaction.amount,
+                        description: transaction.description,
+                        trackingStatus: transaction.trackingStatus,
+                        receiverBank: transaction.receiverBank,
+                        receiverBankAccount: transaction.receiverBankAccount,
+                        createdDateMs: transaction.timestamp - transaction.processingTime,
+                        acknowledgedDateMs: transaction.timestamp
+                    }
+                };
+                
+                document.getElementById('jsonDisplay').textContent = 
+                    JSON.stringify(json, null, 2);
+            }
+            
+            updatePerformanceChart() {
+                const canvas = document.getElementById('performanceChart');
+                if (!canvas.getContext) return;
+                
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, width, height);
+                
+                if (this.performanceData.length < 2) return;
+                
+                // Draw performance graph
+                ctx.beginPath();
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 2;
+                
+                const maxTx = Math.max(...this.performanceData.map(d => d.txPerSecond));
+                const data = this.performanceData.map(d => d.txPerSecond);
+                
+                data.forEach((value, index) => {
+                    const x = (index / (data.length - 1)) * width;
+                    const y = height - (value / maxTx) * height * 0.8;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+                
+                // Draw grid
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.lineWidth = 1;
+                
+                // Horizontal lines
+                for (let i = 0; i <= 5; i++) {
+                    const y = (i / 5) * height;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                
+                this.consoleHistory.push(logEntry);
+                if (this.consoleHistory.length > 10) {
+                    this.consoleHistory.shift();
+                }
+                
+                const consoleOutput = document.getElementById('consoleOutput');
+                consoleOutput.innerHTML = this.consoleHistory.map(entry => 
+                    `<div class="console-line">${entry}</div>`
+                ).join('');
+                consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            }
+            
+            generateHash() {
+                const chars = '0123456789abcdef';
+                let hash = '';
+                for (let i = 0; i < 64; i++) {
+                    hash += chars[Math.floor(Math.random() * 16)];
+                }
+                return hash.substring(0, 16) + '....';
+            }
+            
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+        
+        // Initialize the simulation
+        document.addEventListener('DOMContentLoaded', function() {
+            const simulation = new BankingSimulation();
+            
+            // Form submission
+            document.getElementById('transferForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    fromAccountId: document.getElementById('fromAccount').value,
+                    toAccountId: document.getElementById('toAccount').value,
+                    currency: document.getElementById('currency').value,
+                    amount: parseFloat(document.getElementById('amount').value),
+                    description: document.getElementById('description').value,
+                    receiverBank: document.getElementById('receiverBank').value,
+                    receiverBankAccount: document.getElementById('receiverAccount').value
+                };
+                
+                // Show processing
+                const submitBtn = document.getElementById('submitTransaction');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>⏳</span> Processing...';
+                
+                // Process transaction
+                await simulation.processTransaction(formData);
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🚀</span> Send Transaction';
+            });
+            
+            // Simulation controls
+            document.getElementById('startSimulation').addEventListener('click', () => {
+                simulation.startSimulation();
+            });
+            
+            document.getElementById('stopSimulation').addEventListener('click', () => {
+                simulation.stopSimulation();
+            });
+            
+            document.getElementById('resetSimulation').addEventListener('click', () => {
+                simulation.resetSimulation();
+            });
+            
+            // Settings controls
+            document.getElementById('autoMode').addEventListener('change', function() {
+                simulation.autoMode = this.checked;
+                simulation.log(`Auto mode ${this.checked ? 'enabled' : 'disabled'}`);
+            });
+            
+            document.getElementById('speedSlider').addEventListener('input', function() {
+                const values = ['Very Slow', 'Slow', 'Normal', 'Fast', 'Very Fast'];
+                const index = Math.floor((this.value / 10) * values.length);
+                document.getElementById('speedValue').textContent = values[index] || 'Normal';
+                simulation.simulationSettings.speed = parseInt(this.value);
+            });
+            
+            document.getElementById('successSlider').addEventListener('input', function() {
+                document.getElementById('successValue').textContent = `${this.value}%`;
+                simulation.simulationSettings.successRate = parseInt(this.value);
+            });
+            
+            document.getElementById('latencySlider').addEventListener('input', function() {
+                document.getElementById('latencyValue').textContent = `${this.value}ms`;
+                simulation.simulationSettings.latency = parseInt(this.value);
+            });
+            
+            // Volume controls
+            document.getElementById('lowVolume').addEventListener('click', function() {
+                simulation.simulationSettings.volume = 'low';
+                simulation.simulationSettings.speed = 2;
+                document.getElementById('speedSlider').value = 2;
+                document.getElementById('speedValue').textContent = 'Slow';
+                simulation.log('Volume set to Low');
+            });
+            
+            document.getElementById('mediumVolume').addEventListener('click', function() {
+                simulation.simulationSettings.volume = 'medium';
+                simulation.simulationSettings.speed = 5;
+                document.getElementById('speedSlider').value = 5;
+                document.getElementById('speedValue').textContent = 'Normal';
+                simulation.log('Volume set to Medium');
+            });
+            
+            document.getElementById('highVolume').addEventListener('click', function() {
+                simulation.simulationSettings.volume = 'high';
+                simulation.simulationSettings.speed = 8;
+                document.getElementById('speedSlider').value = 8;
+                document.getElementById('speedValue').textContent = 'Fast';
+                simulation.log('Volume set to High');
+            });
+            
+            // Error injection
+            document.getElementById('noErrors').addEventListener('click', function() {
+                simulation.simulationSettings.errorRate = 0;
+                simulation.simulationSettings.successRate = 100;
+                document.getElementById('successSlider').value = 100;
+                document.getElementById('successValue').textContent = '100%';
+                simulation.log('Error injection disabled');
+            });
+            
+            document.getElementById('randomErrors').addEventListener('click', function() {
+                simulation.simulationSettings.errorRate = 10;
+                simulation.simulationSettings.successRate = 90;
+                document.getElementById('successSlider').value = 90;
+                document.getElementById('successValue').textContent = '90%';
+                simulation.log('Random errors enabled (10%)');
+            });
+            
+            document.getElementById('stressTest').addEventListener('click', function() {
+                simulation.simulationSettings.stressTest = true;
+                simulation.simulationSettings.errorRate = 30;
+                simulation.simulationSettings.successRate = 70;
+                document.getElementById('successSlider').value = 70;
+                document.getElementById('successValue').textContent = '70%';
+                simulation.log('Stress test mode enabled');
+            });
+            
+            // Test connection
+            document.getElementById('testConnection').addEventListener('click', function() {
+                simulation.log('Testing network connection...');
+                setTimeout(() => {
+                    simulation.log('✅ Connection test successful');
+                }, 1000);
+            });
+            
+            // Copy JSON
+            document.getElementById('copyJson').addEventListener('click', function() {
+                const json = document.getElementById('jsonDisplay').textContent;
+                navigator.clipboard.writeText(json);
+                simulation.log('JSON copied to clipboard');
+            });
+            
+            // Export data
+            document.getElementById('exportData').addEventListener('click', function() {
+                const data = {
+                    transactions: simulation.transactions,
+                    metrics: simulation.metrics,
+                    settings: simulation.simulationSettings
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'simulation_data.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                simulation.log('Simulation data exported');
+            });
+            
+            // Initialize network visualization
+            simulation.createNetworkVisualization();
+        });
+    </script>
+</body>
+</html>
